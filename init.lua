@@ -14,37 +14,27 @@ end
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
--- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
--- Make line numbers default
-vim.o.number = true
--- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
+vim.o.number = true -- Line numbers
 vim.o.relativenumber = true
 
 vim.o.tabstop = 4
 vim.o.shiftwidth = 0
 
--- Enable mouse mode, can be useful for resizing splits for example!
-vim.o.mouse = 'a'
+vim.o.mouse = 'a' -- Turns on mouse mode
 
--- Don't show the mode, since it's already in the status line
-vim.o.showmode = false
+vim.o.showmode = false -- Don't show the mode, since it's already in the status line
 
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
---  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
 vim.schedule(function()
   vim.o.clipboard = 'unnamedplus'
 end)
 
--- Enable break indent
-vim.o.breakindent = true
-
--- Save undo history
-vim.o.undofile = true
+vim.o.breakindent = true -- Enable break indent
+vim.o.undofile = true -- Save undo history
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.o.ignorecase = true
@@ -112,21 +102,6 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
--- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
--- vim.keymap.set('n', '<C-S-h>', '<C-w>H', { desc = 'Move window to the left' })
--- vim.keymap.set('n', '<C-S-l>', '<C-w>L', { desc = 'Move window to the right' })
--- vim.keymap.set('n', '<C-S-j>', '<C-w>J', { desc = 'Move window to the lower' })
--- vim.keymap.set('n', '<C-S-k>', '<C-w>K', { desc = 'Move window to the upper' })
-
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -169,7 +144,11 @@ rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  {
+    'NMAC427/guess-indent.nvim',
+    opts = {},
+  }, -- Detect tabstop and shiftwidth automatically
+  --{ 'tpope/vim-sleuth' },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -847,7 +826,54 @@ require('lazy').setup({
         },
       }
 
-      vim.cmd.colorscheme 'catppuccin-mocha'
+      -- vim.cmd.colorscheme 'catppuccin-mocha'
+    end,
+  },
+
+  {
+    'Mofiqul/vscode.nvim',
+    config = function()
+      local c = require('vscode.colors').get_colors()
+      require('vscode').setup {
+        -- Alternatively set style in setup
+        -- style = 'light'
+
+        -- Enable transparent background
+        -- transparent = true,
+
+        -- Enable italic comment
+        italic_comments = true,
+
+        -- Enable italic inlay type hints
+        italic_inlayhints = true,
+
+        -- Underline `@markup.link.*` variants
+        underline_links = true,
+
+        -- Disable nvim-tree background color
+        -- disable_nvimtree_bg = true,
+
+        -- Apply theme colors to terminal
+        -- terminal_colors = true,
+
+        -- Override colors (see ./lua/vscode/colors.lua)
+        color_overrides = {
+          -- vscLineNumber = '#FFFFFF',
+        },
+
+        -- Override highlight groups (see ./lua/vscode/theme.lua)
+        group_overrides = {
+          -- this supports the same val table as vim.api.nvim_set_hl
+          -- use colors from this colorscheme by requiring vscode.colors!
+          Cursor = { fg = c.vscDarkBlue, bg = c.vscLightGreen, bold = true },
+          MiniStatuslineModeCommand = { fg = c.vscBack, bg = c.vscYellowOrange, bold = true },
+          MiniStatuslineModeInsert = { fg = c.vscBack, bg = c.vscLightGreen, bold = true },
+          MiniStatuslineModeNormal = { fg = c.vscBack, bg = c.vscLightBlue, bold = true },
+          MiniStatuslineModeReplace = { fg = c.vscBack, bg = c.vscLightRed, bold = true },
+        },
+      }
+
+      vim.cmd.colorscheme 'vscode'
     end,
   },
 
