@@ -21,6 +21,7 @@ vim.o.relativenumber = true
 
 vim.o.tabstop = 4
 vim.o.shiftwidth = 0
+vim.opt.colorcolumn = '80,100'
 
 vim.o.mouse = 'a' -- Turns on mouse mode
 
@@ -144,10 +145,47 @@ rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
+  { 'tpope/vim-repeat' },
+  {
+    'ggandor/leap.nvim',
+    config = function()
+      vim.keymap.set({ 'n', 'x', 'o' }, 'gw', '<Plug>(leap)')
+      vim.keymap.set('n', 'gW', '<Plug>(leap-from-window)')
+      vim.api.nvim_set_hl(0, 'LeapBackdrop', { link = 'Comment' })
+      -- Highly recommended: define a preview filter to reduce visual noise
+      -- and the blinking effect after the first keypress
+      -- (`:h leap.opts.preview`). You can still target any visible
+      -- positions if needed, but you can define what is considered an
+      -- exceptional case.
+      -- Exclude whitespace and the middle of alphabetic words from preview:
+      --   foobar[baaz] = quux
+      --   ^----^^^--^^-^-^--^
+      require('leap').opts.preview = function(ch0, ch1, ch2)
+        return not (ch1:match '%s' or (ch0:match '%a' and ch1:match '%a' and ch2:match '%a'))
+      end
+
+      -- Define equivalence classes for brackets and quotes, in addition to
+      -- the default whitespace group:
+      require('leap').opts.equivalence_classes = {
+        ' \t\r\n',
+        '([{',
+        ')]}',
+        '\'"`',
+      }
+
+      -- Use the traversal keys to repeat the previous motion without
+      -- explicitly invoking Leap:
+      require('leap.user').set_repeat_keys('<enter>', '<backspace>')
+    end,
+  },
   {
     'NMAC427/guess-indent.nvim',
     opts = {},
   }, -- Detect tabstop and shiftwidth automatically
+  {
+    'mg979/vim-visual-multi',
+    config = function() end,
+  },
   --{ 'tpope/vim-sleuth' },
 
   -- NOTE: Plugins can also be added by using a table,
@@ -466,7 +504,7 @@ require('lazy').setup({
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
-          map('gW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
+          map('gS', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
 
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
@@ -716,6 +754,20 @@ require('lazy').setup({
           -- },
         },
         opts = {},
+        config = function()
+          vim.api.nvim_create_autocmd('ModeChanged', {
+            pattern = '*',
+            callback = function()
+              if
+                ((vim.v.event.old_mode == 's' and vim.v.event.new_mode == 'n') or vim.v.event.old_mode == 'i')
+                and require('luasnip').session.current_nodes[vim.api.nvim_get_current_buf()]
+                and not require('luasnip').session.jump_active
+              then
+                require('luasnip').unlink_current()
+              end
+            end,
+          })
+        end,
       },
       'folke/lazydev.nvim',
     },
