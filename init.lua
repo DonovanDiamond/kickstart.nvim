@@ -17,8 +17,9 @@ end
 --  For more options, you can see `:help option-list`
 
 vim.o.number = true -- Line numbers
-vim.o.relativenumber = true
+vim.o.relativenumber = false
 
+vim.o.wrap = false
 vim.o.tabstop = 4
 vim.o.shiftwidth = 0
 vim.opt.colorcolumn = '80,100'
